@@ -98,6 +98,10 @@ macro_rules! impl_fmt_for {
             impl<'a, Color: crate::Color, T: $trait> $trait for $ty<'a, Color, T> {
                 #[inline(always)]
                 fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                    if std::env::vars().find(|x| x.0 == "NO_COLOR").is_some() {
+                        return <T as $trait>::fmt(&self.0, f);
+                    }
+
                     f.write_str(Color::$const)?;
                     <T as $trait>::fmt(&self.0, f)?;
                     f.write_str("\x1b[0m")
@@ -137,6 +141,10 @@ macro_rules! impl_fmt_for_dyn {
             impl<'a, Color: crate::DynColor, T: $trait> $trait for $ty<'a, Color, T> {
                 #[inline(always)]
                 fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                    if std::env::vars().find(|x| x.0 == "NO_COLOR").is_some() {
+                        return <T as $trait>::fmt(&self.0, f);
+                    }
+
                     (self.1).$fmt(f)?;
                     <T as $trait>::fmt(&self.0, f)?;
                     f.write_str("\x1b[0m")

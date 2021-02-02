@@ -8,6 +8,9 @@ macro_rules! impl_fmt_for_style {
         $(
             impl<'a, T: $trait> $trait for $ty<'a, T> {
                 fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                    if std::env::vars().find(|x| x.0 == "NO_COLOR").is_some() {
+                        return <_ as $trait>::fmt(&self.0, f);
+                    }
                     f.write_str($ansi)?;
                     <_ as $trait>::fmt(&self.0, f)?;
                     f.write_str("\x1b[0m")
